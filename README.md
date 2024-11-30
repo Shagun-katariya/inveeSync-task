@@ -5,6 +5,8 @@
 1. [Features](#features)
 2. [Technologies Used](#technologies-used)
 3. [Setup Instructions](#setup-instructions)
+4. [Confusion](#confusion)
+5. [Result](#result)
 
 ---
 
@@ -55,3 +57,7 @@ npm start
 Open the application in your browser at:
 
 http://localhost:3000
+
+**Confusion: There were a few aspects I didn’t fully grasp, such as the exact implementation of key validations. For instance, I included some UI validations not explicitly mentioned in the requirements, which led to confusion. Additionally, I wasn’t entirely clear about the specific details regarding the tenant ID, is_job_work, and factory ID. With a better understanding of these elements, I’m confident I could have delivered the task more effectively
+
+**Result: This was a great project, and I truly enjoyed working on it. Thank you for the opportunity! Let’s connect if you feel my skills and approach align with your expectations
