@@ -5,13 +5,6 @@
 1. [Features](#features)
 2. [Technologies Used](#technologies-used)
 3. [Setup Instructions](#setup-instructions)
-4. [Project Structure](#project-structure)
-5. [Usage](#usage)
-6. [Customization](#customization)
-7. [Dynamic Responsiveness](#dynamic-responsiveness)
-8. [Roadmap](#roadmap)
-9. [Contributing](#contributing)
-10. [License](#license)
 
 ---
 
@@ -51,7 +44,7 @@ Ensure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Shagun-katariya/shagun-task.git
+   git clone https://github.com/Shagun-katariya/inveeSync-task.git
    cd shagun-task
    Install dependencies:
 
