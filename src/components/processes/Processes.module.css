@@ -1,0 +1,366 @@
+/* Add Item Button */
+.addItemButton {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #2ecc71;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+}
+
+/* Search Input */
+.searchInput {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+  margin-bottom: -15px;
+}
+
+.searchInput:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+.addItemButton:hover {
+  background-color: #27ae60;
+  transform: translateY(-2px);
+}
+
+/* Table */
+.itemsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.itemsTable th,
+.itemsTable td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.itemsTable .status.pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.itemsTable td.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+/* Icon styles */
+.editIcon,
+.deleteIcon {
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #3498db;
+  transition: color 0.3s ease;
+}
+
+.editIcon:hover {
+  color: #2980b9;
+}
+
+.deleteIcon {
+  color: #e74c3c;
+}
+
+.deleteIcon:hover {
+  color: #c0392b;
+}
+
+/* Modal Overlay */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Modal Content */
+.modalContent {
+  background: linear-gradient(135deg, #ffffff, #f7f7f7);
+  padding: 40px;
+  border-radius: 12px;
+  width: 450px;
+  max-width: 95%;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.5s ease-out;
+  transform: scale(0.95);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Hover effect for modal content */
+.modalContent:hover {
+  transform: scale(1);
+}
+
+/* Title */
+.modalContent h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #2c3e50;
+  font-weight: bold;
+  text-align: center;
+  font-family: "Arial", sans-serif;
+}
+
+/* Form labels */
+.modalContent label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #444;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Input fields */
+.modalContent input {
+  width: 90%;
+  padding: 15px;
+  margin: 10px 0px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+  font-family: "Arial", sans-serif;
+  color: #333;
+}
+
+/* Focus effect on inputs */
+.modalContent input:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+}
+
+/* Red border when validation fails */
+.modalContent input[style*="border-color: red"] {
+  border-color: #e74c3c;
+}
+
+/* Button Styles */
+.modalContent button {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #3498db;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.modalContent button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+/* Cancel Button Styles */
+.modalContent button.cancelButton {
+  background-color: #e74c3c;
+}
+
+.modalContent button.cancelButton:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Button container */
+.modalContent .buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-40px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.processSearchQuery {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.noProcessFound {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  color: #777;
+}
+
+.processTableContainer {
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background-color: #f4f4f4;
+  position: sticky;
+  top: 0;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #fff;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+/* Responsive Styles */
+
+/* For screens less than 1140px */
+@media (max-width: 1140px) {
+  .addItemButton {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+
+  .modalContent h2 {
+    font-size: 1.6rem;
+  }
+
+  .modalContent input {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .modalContent button {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+
+  .searchInput {
+    width: 250px;
+  }
+}
+
+/* For screens less than 768px (tablets and small devices) */
+@media (max-width: 768px) {
+  .addItemButton {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+
+
+  .modalContent h2 {
+    font-size: 1.5rem;
+  }
+
+  .modalContent input {
+    width: 90%;
+  }
+
+  .modalContent input {
+    padding: 12px;
+  }
+
+
+  .itemsTable {
+    overflow-x: auto;
+  }
+
+  .itemsTable table {
+    font-size: 0.9rem;
+  }
+
+  .processSearchQuery {
+    flex-direction: column;
+    row-gap: 10px;
+  }
+
+  .processSearchQuery .searchInput {
+    width: 96%;
+    margin-bottom: 10px;
+  }
+}
+
+/* For screens less than 480px (mobile) */
+@media (max-width: 480px) {
+  .addItemButton {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+
+  .modalContent h2 {
+    font-size: 1.3rem;
+  }
+
+  .modalContent input,
+  .modalContent button {
+    font-size: 0.9rem;
+  }
+
+  table {
+    font-size: 0.8rem;  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  .processSearchQuery {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+  }
+
+  .processSearchQuery .searchInput {
+    width: 96%;
+    margin-bottom: 10px;
+  }
+}

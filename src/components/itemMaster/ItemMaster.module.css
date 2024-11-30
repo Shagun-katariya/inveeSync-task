@@ -1,0 +1,184 @@
+/* Add Item Button */
+.addItemButton {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #2ecc71;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+}
+
+.addItemButton:hover {
+  background-color: #27ae60;
+  transform: translateY(-2px);
+}
+
+/* Table Styles */
+.itemsTable {
+  overflow-y: auto;
+}
+
+/* Table Layout */
+.itemsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+/* Table Header and Data Cells */
+.itemsTable th,
+.itemsTable td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+/* Pending Status Style */
+.itemsTable .status.pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.itemsTable td.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+/* Icon Styles */
+.editIcon,
+.deleteIcon {
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #3498db;
+  transition: color 0.3s ease;
+}
+
+.editIcon:hover {
+  color: #2980b9;
+}
+
+.deleteIcon {
+  color: #e74c3c;
+}
+
+.deleteIcon:hover {
+  color: #c0392b;
+}
+
+/* Search Container */
+.searchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Search Input */
+.searchInput {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+  margin-bottom: -15px;
+}
+
+.searchInput:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+/* No Items Found Message */
+.noItemsFound {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  color: #777;
+}
+
+/* Responsive Styles */
+
+/* For screens less than 1140px */
+@media (max-width: 1140px) {
+  .addItemButton {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
+
+  .itemsTable table {
+    font-size: 0.9rem;
+  }
+
+  .itemsTable th, .itemsTable td {
+    padding: 8px;
+  }
+
+  .searchInput {
+    width: 250px;
+  }
+}
+
+/* For screens less than 768px (Mobile) */
+@media (max-width: 768px) {
+  .addItemButton {
+    width: 100%; /* Make button full width */
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+
+  .itemsTable {
+    overflow-x: auto; /* Enable horizontal scrolling on mobile */
+  }
+
+  .itemsTable table {
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .itemsTable th, .itemsTable td {
+    padding: 8px;
+  }
+
+  .searchContainer {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+  }
+
+  .searchInput {
+    width: 96%;
+    margin-bottom: 10px;
+  }
+}
+
+/* For screens less than 480px */
+@media (max-width: 480px) {
+  .addItemButton {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .itemsTable table {
+    font-size: 0.8rem;
+  }
+
+  .itemsTable th, .itemsTable td {
+    padding: 6px;
+  }
+
+  .searchInput {
+    width: 96%;
+  }
+
+  .searchContainer {
+    width: 100%;
+  }
+
+  .noItemsFound {
+    font-size: 16px;
+  }
+}

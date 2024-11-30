@@ -1,0 +1,415 @@
+.bulkUploadModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 40vw;
+  text-align: center;
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: none !important;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.closeButton:hover {
+  cursor: pointer;
+}
+
+.fileDropZone {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.fileDropZone:hover {
+  border-color: #007bff;
+}
+
+.browseButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.browseButton:hover {
+  background-color: #0056b3;
+}
+
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+input:checked + .toggleSlider {
+  background-color: #4caf50;
+}
+
+input:checked + .toggleSlider:before {
+  transform: translateX(25px);
+}
+
+.toggleLabel {
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cancelButton,
+.uploadButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancelButton {
+  background-color: #ccc;
+}
+
+.cancelButton:hover {
+  background-color: #aaa;
+}
+
+.uploadButton {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.uploadButton:disabled {
+  cursor: not-allowed;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.successMessage {
+  color: green;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Container for the entire error management console */
+.ErrorContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  max-width: 900px; /* Reduced width */
+  margin: 30px auto; /* Reduced margin */
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #dddddd;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06); /* Reduced box-shadow */
+  overflow: hidden;
+  font-family: "Arial", sans-serif;
+}
+
+/* Left Section: Console and Progress */
+.consoleSection {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Reduced gap */
+  padding: 15px;
+  max-height: 500px; /* Limit height */
+  overflow-y: auto;
+}
+
+/* Summary Section */
+.summary {
+  font-size: 14px; /* Smaller font size */
+  color: #444444;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0; /* Reduced padding */
+  font-size: 14px; /* Smaller font size */
+  color: #555555;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.summaryRow span:first-child {
+  font-weight: bold;
+  color: #333333;
+}
+
+/* Progress Bar */
+.progressBar {
+  display: flex;
+  align-items: center;
+  height: 25px; /* Smaller height */
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e6e6e6;
+  position: relative;
+  margin-top: 8px;
+}
+
+.progressText {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-weight: bold;
+  font-size: 12px; /* Smaller font size */
+}
+
+.progressSuccess {
+  background-color: #5cb85c;
+  height: 100%;
+}
+
+.progressError {
+  background-color: #d9534f;
+  height: 100%;
+}
+
+/* Error List */
+.errorList {
+  border: 1px solid #f1c1c8;
+  background-color: #ffe3e7;
+  padding: 12px;
+  border-radius: 8px;
+  max-height: 320px; /* Smaller max height */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e57373 #ffe3e7;
+}
+
+.errorList::-webkit-scrollbar {
+  width: 6px; /* Narrow scrollbar */
+}
+
+.errorList::-webkit-scrollbar-thumb {
+  background-color: #e57373;
+  border-radius: 4px;
+}
+
+.errorList h4 {
+  margin-bottom: 8px; /* Reduced margin */
+  font-size: 16px; /* Smaller font size */
+  font-weight: bold;
+  color: #8a2b31;
+}
+
+.errorItem {
+  font-size: 14px; /* Smaller font size */
+  padding: 10px;
+  background-color: #f8bec5;
+  margin-bottom: 8px; /* Reduced margin */
+  border-radius: 6px;
+  border-left: 4px solid #d9534f;
+  color: #721c24;
+}
+
+/* Right Section: Form */
+.formSection {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  gap: 15px; /* Reduced gap */
+}
+
+/* Section Header */
+.sectionHeader {
+  font-size: 18px; /* Smaller font size */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 15px; /* Reduced margin */
+  color: #333333;
+}
+
+/* Form Container */
+.errorForm {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px; /* Reduced gap */
+  width: 100%;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Reduced box-shadow */
+}
+
+/* Label Styling */
+.errorForm label {
+  font-size: 14px; /* Smaller font size */
+  font-weight: 600;
+  color: #444444;
+  margin-bottom: 6px; /* Reduced margin */
+}
+
+/* Input Styling */
+.errorForm input {
+  padding: 12px;
+  font-size: 14px; /* Smaller font size */
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  width: 100%;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.errorForm input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Input Placeholder Styling */
+.errorForm input::placeholder {
+  color: #888888;
+  font-size: 14px;
+}
+
+/* Button Container */
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px; /* Reduced gap */
+  margin-top: 25px; /* Reduced margin */
+}
+
+/* Button Styling */
+.applyFixesButton,
+.cancelUploadButton {
+  font-size: 14px; /* Smaller font size */
+  padding: 12px 24px; /* Smaller padding */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  width: 48%;
+}
+
+.applyFixesButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.applyFixesButton:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.cancelUploadButton {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancelUploadButton:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .ErrorContainer {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .errorForm {
+    padding: 12px;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .applyFixesButton,
+  .cancelUploadButton {
+    width: 100%;
+    padding: 10px 20px; /* Smaller padding */
+  }
+
+  .consoleSection,
+  .formSection {
+    flex: 1;
+  }
+
+  .summaryRow {
+    font-size: 12px; /* Smaller font size */
+  }
+}

@@ -1,0 +1,269 @@
+/* General Styling for Modal */
+.auditLogModal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.auditLogContainer {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 70%;
+  max-width: 900px;
+  padding: 20px 30px;
+  font-family: "Arial", sans-serif;
+  position: relative;
+}
+
+/* Header Styling */
+.auditLogHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.auditLogTitle {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888888;
+  transition: color 0.3s;
+}
+
+.closeButton:hover {
+  color: #555555;
+}
+
+/* Filter Bar Styling */
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.filterBar select,
+.filterBar input {
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.filterBar input::placeholder {
+  color: #aaaaaa;
+}
+
+.filterBar select:hover,
+.filterBar input:focus {
+  border-color: #888888;
+}
+
+/* Table Styling */
+.auditLogTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.auditLogTable thead {
+  background: #f7f7f7;
+  color: #555555;
+}
+
+.auditLogTable th {
+  font-size: 14px;
+  padding: 10px;
+  border-bottom: 1px solid #eeeeee;
+  text-transform: uppercase;
+}
+
+.auditLogTable tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.auditLogTable td {
+  padding: 10px;
+  font-size: 14px;
+  color: #333333;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.auditLogTable td.action {
+  text-align: center;
+}
+
+.auditLogTable .statusCreated {
+  color: #28a745;
+  font-weight: bold;
+  padding: 5px 10px;
+  background: rgba(40, 167, 69, 0.2);
+  border-radius: 4px;
+}
+
+.auditLogTable .statusDeleted {
+  color: #dc3545;
+  font-weight: bold;
+  padding: 5px 10px;
+  background: rgba(220, 53, 69, 0.2);
+  border-radius: 4px;
+}
+
+.auditLogTable .statusUpdated {
+  color: #007bff;
+  font-weight: bold;
+  padding: 5px 10px;
+  background: rgba(0, 123, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Pagination Styling */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.paginationInfo {
+  font-size: 14px;
+  color: #555555;
+}
+
+.paginationButtons {
+  display: flex;
+  gap: 5px;
+}
+
+.paginationButton {
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.paginationButton:hover {
+  background: #f7f7f7;
+  border-color: #888888;
+}
+
+.paginationButton.active {
+  background: #007bff;
+  color: #ffffff;
+  border-color: #007bff;
+}
+
+.noData{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+  .auditLogContainer {
+    width: 80%;
+    padding: 15px 20px;
+  }
+
+  .auditLogTitle {
+    font-size: 18px; /* Adjust title font size */
+  }
+
+  .filterBar select,
+  .filterBar input {
+    width: 48%; /* Allow filters to take up less width */
+    margin-bottom: 12px; /* Adjust margin */
+  }
+
+  .auditLogTable th,
+  .auditLogTable td {
+    font-size: 12px; /* Reduce table font size */
+    padding: 8px; /* Reduce padding */
+  }
+
+  .auditLogTable .statusCreated,
+  .auditLogTable .statusDeleted,
+  .auditLogTable .statusUpdated {
+    font-size: 12px; /* Reduce status font size */
+  }
+
+  .paginationInfo {
+    font-size: 12px; /* Adjust pagination info font size */
+  }
+
+  .paginationButton {
+    font-size: 12px; /* Adjust pagination button font size */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .auditLogContainer {
+    width: 90%;
+    padding: 10px 15px;
+  }
+
+  .auditLogTitle {
+    font-size: 16px; /* Smaller title font size */
+  }
+
+  .filterBar {
+    flex-direction: column; /* Stack filters vertically */
+    align-items: stretch; /* Stretch filters to full width */
+  }
+
+  .filterBar select{
+    width: 100%; /* Full width for inputs */
+  }
+  .filterBar input {
+    width: 96%; /* Full width for inputs */
+  }
+
+  .auditLogTable th,
+  .auditLogTable td {
+    font-size: 12px; /* Adjust table font size for smaller screens */
+    padding: 6px; /* Reduced padding for table cells */
+  }
+
+  .auditLogTable {
+    font-size: 12px; /* Adjust font size for table */
+  }
+
+  .pagination {
+    flex-direction: column; /* Stack pagination vertically */
+    align-items: center; /* Center pagination items */
+  }
+
+  .paginationButtons {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .paginationInfo{
+    margin-bottom: 10px;
+  }
+
+  .paginationButton {
+    width: 100%; /* Full width for pagination buttons */
+    padding: 8px; /* Adjust padding */
+  }
+}
