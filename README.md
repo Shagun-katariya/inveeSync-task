@@ -5,9 +5,10 @@
 1. [Features](#features)
 2. [Technologies Used](#technologies-used)
 3. [Setup Instructions](#setup-instructions)
-4. [Performance](#performance)
-5. [Confusion](#confusion)
-6. [Result](#result)
+4. [Assumption for Bulk upload CSV and Download Template](#Assumption)
+5. [Performance](#performance)
+6. [Confusion](#confusion)
+7. [Result](#result)
 
 ---
 
@@ -60,14 +61,26 @@ Open the application in your browser at:
 http://localhost:3000
 ---
 
-**Performance: Added Performance and other aspects image in the root directory
+##Assumption for Bulk upload CSV and Download Template:
+CSV column names must look like this: 
+        supplierItem	processDescription	qualityCheck	conversionRatio
+        dummy1	      processdes1	        6	            4
+        	      	                        3	            
+        dummy3	      processdes3	    
+        
+Download Error free CSV 
+
 
 ---
 
-**Confusion: There were a few aspects I didn’t fully grasp, such as the exact implementation of key validations. For instance, I included some UI validations not explicitly mentioned in the requirements, which led to confusion. Additionally, I wasn’t entirely clear about the specific details regarding the tenant ID, is_job_work, and factory ID. With a better understanding of these elements, I’m confident I could have delivered the task more effectively
+##Performance: Added Performance and other aspects image in the root directory
 
 ---
 
-**Result: This was a great project, and I truly enjoyed working on it. Thank you for the opportunity! Let’s connect if you feel my skills and approach align with your expectations
+##Confusion: There were a few aspects I didn’t fully grasp, such as the exact implementation of key validations. For instance, I included some UI validations not explicitly mentioned in the requirements, which led to confusion. Additionally, I wasn’t entirely clear about the specific details regarding the tenant ID, is_job_work, and factory ID. With a better understanding of these elements, I’m confident I could have delivered the task more effectively
+
+---
+
+##Result: This was a great project, and I truly enjoyed working on it. Thank you for the opportunity! Let’s connect if you feel my skills and approach align with your expectations
 
 ---
