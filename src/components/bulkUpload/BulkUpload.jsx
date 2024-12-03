@@ -4,7 +4,12 @@ import Papa from "papaparse";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../loader/Loader.jsx";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { addItem } from "../../Redux/slices/itemSlice.js";
+import { addBom } from "../../Redux/slices/bomSlice.js";
+import { startLoading, stopLoading } from "../../Redux/slices/loadingSlice.js";
+import { v4 as uuidv4 } from "uuid";
+
 const BulkUpload = ({
   onClose,
   uploadSuccess,
@@ -13,6 +18,7 @@ const BulkUpload = ({
   setRecords,
   selectedSidebarItem,
 }) => {
+  const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadErrors, setUploadErrors] = useState([]);
@@ -20,6 +26,92 @@ const BulkUpload = ({
   const [skipHeader, setSkipHeader] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { items, error } = useSelector((state) => state.items);
+  const boms = useSelector((state) => state.boms.components);
+  const generateUniqueId = (min, max) => {
+    // Generate a UUIDv4 string
+    const uuid = uuidv4();
+
+    // Convert part of the UUID to an integer
+    const numericId = Math.abs(
+      parseInt(uuid.replace(/-/g, "").slice(0, 8), 16)
+    );
+
+    // Ensure the generated ID is within the provided range [min, max]
+    const rangeId = min + (numericId % (max - min + 1));
+
+    return rangeId;
+  };
+
+  const handleCreateItem = async (createdData) => {
+    console.log("createdData: ", createdData);
+    const minBuffer = createdData.min_buffer ?? Math.floor(Math.random() * 5); // Random value between 0-5
+    const maxBuffer =
+      createdData.max_buffer ?? minBuffer + Math.floor(Math.random() * 10 + 1); // Ensure max_buffer >= min_buffer
+
+    createdData.status = "Complete";
+
+    // Step 2: Generate random tenant_id and construct the item data
+    const itemData = {
+      id: createdData.id || generateUniqueId(),
+      internal_item_name: createdData.internal_item_name,
+      tenant_id: createdData.tenant_id || Math.floor(Math.random() * 1000), // Random tenant ID
+      item_description: createdData.item_description || "sample Item",
+      uom: createdData.uom,
+      created_by: "user1",
+      last_updated_by: "user2",
+      type: createdData.type,
+      max_buffer: createdData.max_buffer || maxBuffer,
+      min_buffer: createdData.min_buffer || minBuffer,
+      customer_item_name: createdData.customer_item_name || "Customer ABC",
+      is_deleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      additional_attributes: {
+        drawing_revision_number: createdData.drawing_revision_number || 1,
+        drawing_revision_date:
+          createdData.drawing_revision_date || "2023-04-01",
+        avg_weight_needed:
+          createdData.additional_attributes__avg_weight_needed ?? true,
+        scrap_type:
+          createdData.additional_attributes__scrap_type ||
+          (createdData.type === "sell" ? "default_scrap" : null),
+        shelf_floor_alternate_name:
+          createdData.shelf_floor_alternate_name || "shelf_1",
+      },
+    };
+
+    // Step 3: Send the request to the API
+    try {
+      dispatch(startLoading());
+      console.log("itemData: ", JSON.stringify(itemData));
+      const response = await fetch(
+        "https://api-assignment.inveesync.in/items",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(itemData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save the process");
+      }
+
+      const savedData = await response.json();
+      console.log("item created successfully:", savedData);
+
+      savedData.status = "complete"; // Set status to "complete" upon successful creation
+
+      dispatch(addItem(savedData));
+    } catch (error) {
+      console.error("Failed to create item:", error);
+      toast.error("Failed to create item");
+    } finally {
+      dispatch(stopLoading()); // Hide loader after operation is complete
+    }
+  };
 
   const handleSkipHeaderChange = (e) => {
     setSkipHeader(e.target.checked);
@@ -27,6 +119,16 @@ const BulkUpload = ({
 
   const validateRecord = (item) => {
     const issues = [];
+
+    const isDuplicate = items.some(
+      (existingItem) =>
+        existingItem.internal_item_name === item.internal_item_name &&
+        existingItem.tenant_id === item.tenant_id
+    );
+
+    if (isDuplicate) {
+      issues.push("Duplicate combination of internal_item_name and tenant_id");
+    }
 
     // Key validations
     if (!item.internal_item_name || item.internal_item_name == "null") {
@@ -112,6 +214,16 @@ const BulkUpload = ({
   const validBomRecord = (bom, itemMaster) => {
     const issues = [];
 
+    const exists = boms.some(
+      (component) =>
+        component.component_id === Number(bom.component_id) &&
+        component.item_id === Number(bom.item_id)
+    );
+
+    if (exists) {
+      issues.push("Duplicate combination of item_id and component_id");
+    }
+
     const matchingComponent = itemMaster.find(
       (item) => Number(item.id) === Number(bom.component_id)
     );
@@ -150,6 +262,54 @@ const BulkUpload = ({
     setFile(e.target.files[0]);
   };
 
+  const handleCreateComponent = async (createdData) => {
+    dispatch(startLoading());
+    const payload = {
+      id: createdData.id || generateUniqueId(),
+      component_id: Number(createdData.component_id),
+      quantity: Number(createdData.quantity),
+      item_id: Number(createdData.item_id),
+      created_by: "user3",
+      last_updated_by: "user3",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      const matchingItem = items.find(
+        (item) => item.id === payload.item_id
+      ) || {
+        internal_item_name: "Unknown",
+      };
+      const matchingComponent = items.find(
+        (item) => item.id === payload.component_id
+      ) || {
+        internal_item_name: "Unknown",
+      };
+
+      console.log("payload: ", JSON.stringify(payload));
+      const response = await fetch("https://api-assignment.inveesync.in/bom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save the process");
+      }
+
+      const savedData = await response.json();
+      savedData.internal_item_name = matchingItem.internal_item_name;
+      savedData.component_name = matchingComponent.internal_item_name;
+      dispatch(addBom(savedData));
+    } catch (error) {
+      toast.error("Failed to create component");
+      console.error("Failed to create component:", error);
+    } finally {
+      dispatch(stopLoading());
+    }
+  };
+
   const handleUpload = () => {
     if (!file) return;
 
@@ -161,13 +321,33 @@ const BulkUpload = ({
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
+          const seenCombinations = new Set();
           const parsedRecords = results.data.map((record, index) => {
             let validation;
             if (selectedSidebarItem.includes("Items")) {
               validation = validateRecord(record);
+              // Validate uniqueness of internal_item_name + tenant
+              const uniqueKey = `${record.internal_item_name}-${record.tenant_id}`;
+              if (seenCombinations.has(uniqueKey)) {
+                validation.issues.push(
+                  `Duplicate combination of internal_item_name and tenant: ${uniqueKey}`
+                );
+              } else {
+                seenCombinations.add(uniqueKey);
+              }
             } else {
               validation = validBomRecord(record, items);
+              // Validate uniqueness of internal_item_name + tenant
+              const uniqueKey = `${record.item_id}-${record.component_id}`;
+              if (seenCombinations.has(uniqueKey)) {
+                validation.issues.push(
+                  `Duplicate combination of item_id and tenant_id: ${uniqueKey}`
+                );
+              } else {
+                seenCombinations.add(uniqueKey);
+              }
             }
+
             return {
               id: index + 1,
               ...validation.data,
@@ -177,11 +357,21 @@ const BulkUpload = ({
 
           const failedRecords = parsedRecords.filter((record) => record.errors);
           console.log("failedRecords: ", failedRecords);
+          console.log("parsedData: ", parsedRecords);
+          if (
+            failedRecords.length === 0 &&
+            selectedSidebarItem.includes("Items")
+          ) {
+            // console.log("0");
+            parsedRecords.forEach((entry) => handleCreateItem(entry));
+          } else {
+            parsedRecords.forEach((entry) => handleCreateComponent(entry));
+          }
           setRecords(parsedRecords);
           setUploadErrors(failedRecords);
-          if(failedRecords.length == 0){
+          if (failedRecords.length == 0) {
             setShowErrorConsole(false);
-          }else{
+          } else {
             setShowErrorConsole(true);
           }
           setIsUploading(false);
