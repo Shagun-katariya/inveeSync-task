@@ -17,7 +17,8 @@ import AuditLogs from "../auditLogs/AuditLogs.jsx";
 
 const Dashboard = () => {
   const [selectedItem, setSelectedItem] = useState(null); // Track the selected item for resolving
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState("Items Master");
+  const [selectedSidebarItem, setSelectedSidebarItem] =
+    useState("Items Master");
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -131,7 +132,11 @@ const Dashboard = () => {
               className={
                 selectedSidebarItem === "Items Master" ? styles.selected : ""
               }
-              onClick={() => handleSelectSidebarItems("Items Master")}
+              onClick={() => {
+                handleSelectSidebarItems("Items Master");
+                setSidebarOpen(false);
+                setPendingOpen(false);
+              }}
             >
               Items Master
             </li>
@@ -141,7 +146,8 @@ const Dashboard = () => {
                   ? styles.selected
                   : ""
               }
-              onClick={() => handleSelectSidebarItems("Bill of Materials")}
+              onClick={() => {handleSelectSidebarItems("Bill of Materials"); setSidebarOpen(false);
+                setPendingOpen(false);}}
             >
               Bill of Materials
             </li>
@@ -152,6 +158,8 @@ const Dashboard = () => {
               onClick={() => {
                 setShowBulkUpload(true);
                 setUploadSuccess(true);
+                setSidebarOpen(false);
+                setPendingOpen(false);
               }}
             >
               {buttonText}
@@ -160,6 +168,8 @@ const Dashboard = () => {
             <button
               onClick={() => {
                 setShowAuditLogs(true);
+                setSidebarOpen(false);
+                setPendingOpen(false);
               }}
             >
               View Audit Log

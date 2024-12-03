@@ -64,7 +64,6 @@ http://localhost:3000
 ---
 
 ## Assumption
-### Google Drive(https://drive.google.com/file/d/1-NZ6MCxVhSNB-H5uIKXFkVxIs6gnn8bQ/view?usp=sharing)
 Update the bom and items excel sheet for correct data upload with correct item_id and component_id
 Highly recommend, use only UI for updations
         

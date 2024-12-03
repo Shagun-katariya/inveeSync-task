@@ -23,9 +23,9 @@ const AuditLogs = ({ onClose }) => {
       if (width <= breakpoints.small) {
         setLogsPerPage(5); // Small screens, show fewer logs per page
       } else if (width <= breakpoints.medium) {
-        setLogsPerPage(10); // Medium screens, show more logs per page
+        setLogsPerPage(7); // Medium screens, show more logs per page
       } else {
-        setLogsPerPage(15); // Large screens, show more logs per page
+        setLogsPerPage(10); // Large screens, show more logs per page
       }
     };
 
