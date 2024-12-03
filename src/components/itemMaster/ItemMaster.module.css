@@ -13,6 +13,15 @@
   box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
 }
 
+.itemBuilder {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: "Arial", sans-serif;
+}
+
 .addItemButton:hover {
   background-color: #27ae60;
   transform: translateY(-2px);
@@ -113,7 +122,8 @@
     font-size: 0.9rem;
   }
 
-  .itemsTable th, .itemsTable td {
+  .itemsTable th,
+  .itemsTable td {
     padding: 8px;
   }
 
@@ -139,7 +149,8 @@
     width: 100%;
   }
 
-  .itemsTable th, .itemsTable td {
+  .itemsTable th,
+  .itemsTable td {
     padding: 8px;
   }
 
@@ -166,7 +177,8 @@
     font-size: 0.8rem;
   }
 
-  .itemsTable th, .itemsTable td {
+  .itemsTable th,
+  .itemsTable td {
     padding: 6px;
   }
 

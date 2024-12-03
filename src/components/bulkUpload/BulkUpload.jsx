@@ -4,72 +4,150 @@ import Papa from "papaparse";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../loader/Loader.jsx";
-
+import { useSelector } from "react-redux";
 const BulkUpload = ({
   onClose,
   uploadSuccess,
   setUploadSuccess,
   records,
   setRecords,
+  selectedSidebarItem,
 }) => {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadErrors, setUploadErrors] = useState([]);
   const [showErrorConsole, setShowErrorConsole] = useState(false);
   const [skipHeader, setSkipHeader] = useState(false);
-  const [formFixes, setFormFixes] = useState({
-    supplierItem: "",
-    processDescription: "",
-    qualityCheck: "",
-    conversionRatio: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
+  const { items, error } = useSelector((state) => state.items);
 
   const handleSkipHeaderChange = (e) => {
-    console.log("skipHeader: ", skipHeader);
     setSkipHeader(e.target.checked);
   };
 
-  const validateRecord = (record) => {
-    const errors = [];
-    const columns = Object.keys(record);
+  const validateRecord = (item) => {
+    const issues = [];
 
-    columns.forEach((column, colIndex) => {
-      if (!record[column]) {
-        errors.push({
-          column,
-          columnNumber: colIndex + 1,
-          message: `Missing value in column ${column}`,
-        });
+    // Key validations
+    if (!item.internal_item_name || item.internal_item_name == "null") {
+      issues.push("Missing Item Name");
+    }
+    if (!item.tenant_id || item.tenant_id == "null") {
+      issues.push("Missing Tenant ID");
+    }
+    if (!item.type || item.type == "null") {
+      issues.push("Missing Type");
+    } else if (
+      item.type != "sell" &&
+      item.type != "purchase" &&
+      item.type != "component"
+    ) {
+      issues.push("Invalid Type");
+    }
+
+    // Non-null scrap_type for items with type = sell
+    if (
+      item.type === "sell" &&
+      (!item.additional_attributes__scrap_type ||
+        item.additional_attributes__scrap_type == "")
+    ) {
+      issues.push("Missing Scrap Type for items with type 'sell'");
+    }
+
+    // Min buffer validations for sell and purchase
+    if (
+      (item.type === "sell" || item.type === "purchase") &&
+      (!item.min_buffer || item.min_buffer == "null")
+    ) {
+      issues.push(
+        "Min Buffer is required for items with type 'sell' or 'purchase'"
+      );
+    } else if (item.type === "sell" || item.type === "purchase") {
+      item.min_buffer = item.min_buffer == "null" ? 0 : item.min_buffer;
+      item.max_buffer = item.max_buffer == "null" ? 0 : item.max_buffer;
+
+      if (Number(item.max_buffer) < Number(item.min_buffer)) {
+        issues.push("Max Buffer must be greater than or equal to Min Buffer");
       }
+    }
 
-      if (column === "conversionRatio" && Number(record[column]) <= 0) {
-        errors.push({
-          column,
-          columnNumber: colIndex + 1,
-          message: `Invalid conversion ratio`,
-        });
-      }
+    if (
+      (item.max_buffer && item.max_buffer < 0) ||
+      (item.min_buffer && item.min_buffer < 0)
+    ) {
+      issues.push("Negative Buffer Value");
+    }
 
-      if (column === "supplierItem" && record[column].length < 3) {
-        errors.push({
-          column,
-          columnNumber: colIndex + 1,
-          message: `Supplier item name too short`,
-        });
-      }
-    });
+    // Missing or invalid UOM
+    if (!item.uom) {
+      issues.push("Missing UOM");
+    } else if (!["kgs", "nos"].includes(item.uom.toLowerCase())) {
+      issues.push("Invalid UoM value (not kgs/nos)");
+    }
 
-    return errors.length ? errors : null;
+    // Avg weight needed validations
+    const avgWeightNeeded = item.additional_attributes__avg_weight_needed;
+    console.log("avgWeightNeeded: ", avgWeightNeeded);
+    if (avgWeightNeeded == null || avgWeightNeeded === "") {
+      issues.push("Avg weight needed is missing");
+    } else if (avgWeightNeeded != "TRUE" && avgWeightNeeded != "FALSE") {
+      issues.push("Avg weight needed not boolean");
+    }
+
+    // Date validation
+    const createdAt = new Date(item.createdAt);
+    const updatedAt = new Date(item.updatedAt);
+    if (isNaN(createdAt.getTime()) || isNaN(updatedAt.getTime())) {
+      issues.push("Invalid date provided for createdAt or updatedAt");
+    }
+
+    // Set item status based on issues
+    item.status = issues.length > 0 ? "Pending" : "Complete";
+
+    console.log("issues: ", issues);
+
+    return { data: item, issues };
+  };
+
+  const validBomRecord = (bom, itemMaster) => {
+    const issues = [];
+
+    const matchingComponent = itemMaster.find(
+      (item) => Number(item.id) === Number(bom.component_id)
+    );
+
+    if (matchingComponent && matchingComponent.type === "sell") {
+      issues.push("Sell item cannot be a component in BOM");
+    }
+
+    const matchingItem = itemMaster.find(
+      (item) => Number(item.id) === Number(bom.item_id)
+    );
+
+    if (!matchingItem || !matchingComponent) {
+      issues.push("BOM cannot be created for items not created yet");
+    }
+    if (matchingItem && matchingItem.type === "purchase") {
+      issues.push("purchase item cannot be a item in BOM");
+    }
+
+    // Item ID + Component ID combination should be unique
+    if (bom.item_id && bom.component_id && bom.item_id === bom.component_id) {
+      issues.push("Item id + component id should be unique");
+    }
+
+    // Quantity validation
+    if (bom.quantity < 1 || bom.quantity > 100) {
+      issues.push("Quantity should be between 1 to 100");
+    }
+
+    console.log("issues: ", issues);
+
+    return { data: bom, issues };
   };
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
-  };
-
-  const handleFixesChange = (e) => {
-    const { name, value } = e.target;
-    setFormFixes({ ...formFixes, [name]: value });
   };
 
   const handleUpload = () => {
@@ -84,20 +162,34 @@ const BulkUpload = ({
         skipEmptyLines: true,
         complete: (results) => {
           const parsedRecords = results.data.map((record, index) => {
-            const errors = validateRecord(record);
-            return { id: index + 1, ...record, error: errors };
+            let validation;
+            if (selectedSidebarItem.includes("Items")) {
+              validation = validateRecord(record);
+            } else {
+              validation = validBomRecord(record, items);
+            }
+            return {
+              id: index + 1,
+              ...validation.data,
+              errors: validation.issues.join("; "),
+            };
           });
 
-          const failedRecords = parsedRecords.filter((record) => record.error);
+          const failedRecords = parsedRecords.filter((record) => record.errors);
+          console.log("failedRecords: ", failedRecords);
           setRecords(parsedRecords);
           setUploadErrors(failedRecords);
-          setShowErrorConsole(true);
+          if(failedRecords.length == 0){
+            setShowErrorConsole(false);
+          }else{
+            setShowErrorConsole(true);
+          }
           setIsUploading(false);
-          setUploadSuccess(false);
+          setUploadSuccess(failedRecords.length === 0);
 
           if (failedRecords.length === 0) {
             toast.success("File uploaded and validated successfully!");
-            setFile(null); // Clear the file for a new upload
+            setFile(null);
           } else {
             toast.error("File uploaded with errors, please review and fix");
           }
@@ -112,79 +204,31 @@ const BulkUpload = ({
     reader.readAsText(file);
   };
 
-  const handleApplyFixes = () => {
-    // Create a copy of the current records and errors
-    setIsLoading(true);
-    try {
-      let updatedRecords = [...records];
-      let unresolvedErrors = [];
-
-      console.log("uploadErrors: ", uploadErrors);
-
-      // Loop through each error record
-      uploadErrors.forEach((errorRecord) => {
-        const updatedRecord = { ...errorRecord }; // Copy the record to update
-        console.log("errorRecord: ", errorRecord);
-
-        // Apply form fixes only to columns that have errors
-        console.log("formFixes: ", formFixes);
-        Object.keys(formFixes).forEach((column) => {
-          if (errorRecord.error.some((err) => err.column === column)) {
-            // Update only if the current column matches an error in the record
-            updatedRecord[column] = formFixes[column]; // Replace value with form input
-          }
-        });
-
-        // Revalidate the updated record
-        const newErrors = validateRecord(updatedRecord) || [];
-
-        // Update the main records array
-        const recordIndex = updatedRecords.findIndex(
-          (rec) => rec.id === updatedRecord.id
-        );
-        if (recordIndex !== -1) {
-          updatedRecords[recordIndex] = { ...updatedRecord, error: newErrors };
-        }
-
-        // Track unresolved errors
-        if (newErrors.length > 0) {
-          unresolvedErrors.push({ ...updatedRecord, error: newErrors });
-        }
-      });
-
-      // Update state with resolved records and remaining errors
-      setRecords(updatedRecords);
-      console.log("Updated Records: ", updatedRecords);
-      console.log("Unresolved Errors: ", unresolvedErrors);
-      setUploadErrors(unresolvedErrors);
-
-      // Notify the user of the results
-      if (unresolvedErrors.length === 0) {
-        toast.success(
-          "All fixes applied successfully! Data is now error-free."
-        );
-        setShowErrorConsole(false);
-        onClose();
-      } else {
-        toast.error(
-          `${unresolvedErrors.length} records still have errors. Please review and fix them.`
-        );
-      }
-    } catch (error) {
-      console.log("error at fixes: ", error);
-      toast.error("error occuring at fixes");
-    } finally {
-      setIsLoading(false);
+  const handleDownloadErrors = () => {
+    if (!uploadErrors.length) {
+      toast.info("No errors to download!");
+      return;
     }
 
-    // Clear form fixes
-    setFormFixes({
-      supplierItem: "",
-      processDescription: "",
-      qualityCheck: "",
-      conversionRatio: "",
-    });
+    const csvData = Papa.unparse(
+      uploadErrors.map((record) => ({
+        ...record,
+        errors: record.errors,
+      }))
+    );
+
+    console.log("error data: ", csvData);
+
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "ErrorRecords.csv";
+    link.click();
   };
+
+  const buttonText = selectedSidebarItem.includes("Items")
+    ? "Upload Bulk Item Data"
+    : "Upload Bulk Bom Data";
 
   return (
     <>
@@ -199,7 +243,7 @@ const BulkUpload = ({
             >
               ×
             </button>
-            <h2>Bulk Data Upload</h2>
+            <h2>{buttonText}</h2>
             <div
               className={styles.fileDropZone}
               onClick={() => document.getElementById("file-input").click()}
@@ -258,139 +302,32 @@ const BulkUpload = ({
       {showErrorConsole && (
         <div className={styles.bulkUploadModal}>
           <div className={styles.modalContent}>
-            <h3>Bulk Upload Error Management Console</h3>
-            <div className={styles.ErrorContainer}>
-              <div className={styles.consoleSection}>
-                <div className={styles.summary}>
-                  <div className={styles.summaryRow}>
-                    <span>Total Records:</span>
-                    <span>{records.length}</span>
-                  </div>
-                  <div className={styles.summaryRow}>
-                    <span>Successfully Uploaded:</span>
-                    <span>{records.length - uploadErrors.length}</span>
-                  </div>
-                  <div className={styles.summaryRow}>
-                    <span>Failed Records:</span>
-                    <span>{uploadErrors.length}</span>
-                  </div>
+            <h3>Error Management Console</h3>
+            <div className={styles.consoleSection}>
+              <div className={styles.summary}>
+                <div className={styles.summaryRow}>
+                  <span>Total Records:</span>
+                  <span>{records.length}</span>
                 </div>
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressSuccess}
-                    style={{
-                      width: `${
-                        ((records.length - uploadErrors.length) /
-                          records.length) *
-                        100
-                      }%`,
-                    }}
-                  ></div>
-                  <div
-                    className={styles.progressError}
-                    style={{
-                      width: `${(uploadErrors.length / records.length) * 100}%`,
-                    }}
-                  ></div>
-                  {/* Display Percentage */}
-                  <span className={styles.progressText}>
-                    {records.length > 0
-                      ? `${Math.round(
-                          ((records.length - uploadErrors.length) /
-                            records.length) *
-                            100
-                        )}%`
-                      : "0%"}
-                    <span>Complete</span>
-                  </span>
+                <div className={styles.summaryRow}>
+                  <span>Successful:</span>
+                  <span>{records.length - uploadErrors.length}</span>
                 </div>
-
-                <div className={styles.errorList}>
-                  {uploadErrors.length ? (
-                    uploadErrors.map((record) => (
-                      <div key={record.id} className={styles.errorItem}>
-                        <p>
-                          <b>Row:</b> {record.id}
-                        </p>
-                        {record.error.map((err, idx) => (
-                          <div key={idx}>
-                            <p>
-                              <b>Column:</b> {err.column} (Column{" "}
-                              {err.columnNumber})
-                            </p>
-                            <p>
-                              <b>Error:</b> {err.message}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ))
-                  ) : (
-                    <p>No errors to display.</p>
-                  )}
+                <div className={styles.summaryRow}>
+                  <span>Failed:</span>
+                  <span>{uploadErrors.length}</span>
                 </div>
               </div>
-              {/* Form Section */}
-              <div className={styles.formSection}>
-                <div className={styles.sectionHeader}>
-                  Error Resolution Form
-                </div>
-                <form className={styles.errorForm}>
-                  <label>
-                    Supplier Item Name
-                    <input
-                      type="text"
-                      name="supplierItem"
-                      style={{ width: "90%" }}
-                      value={formFixes.supplierItem}
-                      onChange={handleFixesChange}
-                    />
-                  </label>
-                  <label>
-                    Process Description
-                    <input
-                      type="text"
-                      name="processDescription"
-                      style={{ width: "90%" }}
-                      value={formFixes.processDescription}
-                      onChange={handleFixesChange}
-                    />
-                  </label>
-                  <label>
-                    Quality Check
-                    <input
-                      type="text"
-                      name="qualityCheck"
-                      style={{ width: "90%" }}
-                      value={formFixes.qualityCheck}
-                      onChange={handleFixesChange}
-                    />
-                  </label>
-                  <label>
-                    Conversion Ratio
-                    <input
-                      type="text"
-                      name="conversionRatio"
-                      style={{ width: "90%" }}
-                      value={formFixes.conversionRatio}
-                      onChange={handleFixesChange}
-                    />
-                  </label>
-                </form>
-                <div className={styles.buttonContainer}>
-                  <button
-                    className={styles.cancelUploadButton}
-                    onClick={onClose}
-                  >
-                    Cancel Upload
-                  </button>
-                  <button
-                    className={styles.applyFixesButton}
-                    onClick={handleApplyFixes}
-                  >
-                    Apply Fixes
-                  </button>
-                </div>
+              <div className={styles.buttonContainer}>
+                <button className={styles.cancelUploadButton} onClick={onClose}>
+                  Cancel Upload
+                </button>
+                <button
+                  className={styles.applyFixesButton}
+                  onClick={handleDownloadErrors}
+                >
+                  Download Errors
+                </button>
               </div>
             </div>
           </div>

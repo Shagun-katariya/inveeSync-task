@@ -1,5 +1,4 @@
 .bomBuilder {
-  max-width: 700px;
   margin: 20px auto;
   padding: 20px;
   background-color: #f9f9f9;
@@ -8,60 +7,31 @@
   font-family: "Arial", sans-serif;
 }
 
-.bomBuilder h2 {
-  margin-bottom: 10px;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.bomBuilder p {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.bomForm {
+/* Add Item Button */
+.addItemButton {
   margin-top: 10px;
-}
-
-.bomBuilder select {
-  width: 100%;
-  padding: 10px;
-  font-size: 0.9rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.bomBuilder select:focus {
-  border-color: #007bff;
-}
-
-.formGroup {
-  margin-bottom: 20px;
-}
-
-.formGroup label {
-  display: block;
-  font-size: 0.9rem;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  color: #fff;
+  background-color: #2ecc71;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
   font-weight: bold;
-  color: #555;
-  margin-bottom: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
 }
 
-.formGroup input {
-  width: 100%;
-  padding: 10px;
-  font-size: 0.9rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  outline: none;
-  transition: border-color 0.3s ease;
+.addItemButton:hover {
+  background-color: #27ae60;
+  transform: translateY(-2px);
 }
 
-.formGroup input:focus {
-  border-color: #007bff;
+/* Search Container */
+.searchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Search Input */
@@ -79,6 +49,20 @@
   outline: none;
   box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
 }
+
+.bomBuilder h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.bomBuilder p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+
 
 .addButton {
   padding: 7px;
@@ -152,143 +136,6 @@
   color: #e74c3c;
 }
 
-/* Modal Overlay */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Darker overlay with more opacity */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.4s ease-in-out;
-}
-
-/* Modal Content */
-.modalContent {
-  background: linear-gradient(
-    135deg,
-    #ffffff,
-    #f7f7f7
-  ); /* Subtle gradient for a sleek look */
-  padding: 40px;
-  border-radius: 12px;
-  width: 450px;
-  max-width: 95%;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2); /* Deeper shadow for depth */
-  animation: slideIn 0.5s ease-out;
-  transform: scale(0.95);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* Hover effect for modal content */
-.modalContent:hover {
-  transform: scale(1);
-}
-
-/* Title */
-.modalContent h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  margin-top: 0;
-  color: #2c3e50;
-  font-weight: bold;
-  text-align: center;
-  font-family: "Arial", sans-serif;
-}
-
-/* Form labels */
-.modalContent label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #444;
-  font-family: "Roboto", sans-serif;
-}
-
-/* Input fields */
-.modalContent input {
-  width: 93%;
-  padding: 15px;
-  margin: 10px 0px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background-color: #f9f9f9;
-  font-family: "Arial", sans-serif;
-  color: #333;
-}
-
-/* Focus effect on inputs */
-.modalContent input:focus {
-  border-color: #3498db;
-  outline: none;
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
-}
-
-/* Red border when validation fails */
-.modalContent input[style*="border-color: red"] {
-  border-color: #e74c3c;
-}
-
-/* Button Styles */
-.modalContent button {
-  padding: 12px 24px;
-  font-size: 1.1rem;
-  color: #fff;
-  background-color: #3498db;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-
-.modalContent button:hover {
-  background-color: #2980b9;
-  transform: translateY(-2px);
-}
-
-/* Cancel Button Styles */
-.modalContent button.cancelButton {
-  background-color: #e74c3c;
-}
-
-.modalContent button.cancelButton:hover {
-  background-color: #c0392b;
-  transform: translateY(-2px);
-}
-
-/* Button container */
-.modalContent .buttonContainer {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-/* Modal animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-40px);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
 
 .searchInputQuery {
   display: flex;
@@ -302,13 +149,21 @@
     max-width: 100%;
     padding: 15px;
   }
-
+  .addItemButton{
+    width: 100%; /* Make button full width */
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
   .bomBuilder h2 {
     font-size: 1.2rem;
   }
 
   .bomBuilder p {
     font-size: 0.8rem;
+  }
+
+  .tableContainer {
+    overflow-x: auto; /* Enable horizontal scrolling on mobile */
   }
 
   .formGroup label,
@@ -352,5 +207,15 @@
   .modalContent button {
     font-size: 1rem;
     padding: 10px 20px;
+  }
+  .searchContainer {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+  }
+
+  .searchInput {
+    width: 96%;
+    margin-bottom: 10px;
   }
 }

@@ -5,10 +5,11 @@
 1. [Features](#features)
 2. [Technologies Used](#technologies-used)
 3. [Setup Instructions](#setup-instructions)
-4. [Assumption for Bulk upload CSV and Download Template](#Assumption)
-5. [Performance](#performance)
-6. [Confusion](#confusion)
-7. [Result](#result)
+4. [Assumption](#Assumption)
+5. [Details](#details)
+6. [Performance](#performance)
+7. [Extra Fetures](#extra-features)
+8. [Result](#result)
 
 ---
 
@@ -25,7 +26,7 @@
 
 ## Technologies Used
 
-- **Frontend**: React.js
+- **Frontend**: React.js, Redux(State Management)
 - **CSS Frameworks**: Custom CSS, Responsive Design
 - **Libraries**:
   - `lodash.debounce`: For optimized search input handling
@@ -61,16 +62,34 @@ Open the application in your browser at:
 http://localhost:3000
 ---
 
-## Assumption for Bulk upload CSV and Download Template
-### CSV column names must look like this
-        supplierItem	processDescription	qualityCheck	conversionRatio
-        dummy1	      processdes1	        6	            4
-        	      	                        3	            
-        dummy3	      processdes3	    
+## Assumption
+### Google Drive(https://drive.google.com/file/d/1-NZ6MCxVhSNB-H5uIKXFkVxIs6gnn8bQ/view?usp=sharing)
+Use this Bom upload sheet for faster data test(because I replaced with the correct Item_id and component_id)
+for Items we can use default one
+Highly recommend, use only UI for updations
         
 ### Download Template
-    First, upload and fix bugs in the CSV files then you can download the updated CSV 
+    First, upload and fix bugs in the CSV files then you can download the updated CSV for the respected ones(items, or for bom)
 
+---
+## Details
+
+### items
+create item as per requirement and we can't create data until it meets all the required fields
+we can edit, and delete items
+Validations done when you are change the data
+
+### bom
+create bom as per requirement and we can't create data until it meets all the required fields
+we can edit, and delete boms.
+Validations done when you are change the data
+
+### bulk data upload
+If our are tab is selected for Items then we can upload bulk items, otherwise we can upload bul boms.
+
+after upload, validations done, and we can download error file.
+
+upon succesful upload we can donwload template file. 
 
 ---
 
@@ -79,9 +98,9 @@ http://localhost:3000
    Added Performance and other aspects image in the root directory
 
 ---
-
-## Confusion
-There were a few aspects I didn’t fully grasp, such as the exact implementation of key validations. For instance, I included some UI validations not explicitly mentioned in the requirements, which led to confusion. Additionally, I wasn’t entirely clear about the specific details regarding the tenant ID, is_job_work, and factory ID. With a better understanding of these elements, I’m confident I could have delivered the task more effectively
+## Extra Fetures
+created Audit log component where we can see past changes made by who, at what time, what changes made.
+with searchable options via name, actions, and time
 
 ---
 

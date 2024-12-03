@@ -5,196 +5,127 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import Loader from "../loader/Loader.jsx";
 import { useDebounce } from "use-debounce";
+import { useDispatch, useSelector } from "react-redux";
+import { startLoading, stopLoading } from "../../Redux/slices/loadingSlice";
+import { fetchBOM, deleteBom } from "../../Redux/slices/bomSlice.js";
+import { setPendingItems } from "../../Redux/slices/pendingItemsSlice.js";
+import store from "../../Redux/store.js";
 
-const NewBom = ({ items }) => {
-  const [components, setComponents] = useState([]);
-  const [newComponent, setNewComponent] = useState({
-    component_id: "",
-    quantity: "",
-    item_id: "",
-  });
-  const [selectedComponent, setSelectedComponent] = useState(null); // Track the selected item for resolving
-  const [componentModal, setComponentModal] = useState(false);
+const NewBom = ({handleResolveBomClick}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [debouncedQuery] = useDebounce(searchQuery, 300);
+  const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.loading);
+  const boms = useSelector((state) => state.boms.components);
+  const { items, error } = useSelector((state) => state.items);
 
-  // Fetch components on mount
   useEffect(() => {
-    const fetchComponents = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("https://api-assignment.inveesync.in/bom");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        const newData = data.map((component) => {
-          const matchingItem = items.find(
-            (item) => item.id === component.item_id
-          );
-          return {
-            ...component,
-            internal_item_name: matchingItem?.internal_item_name || "Unknown",
-          };
-        });
-
-        setComponents(newData);
-      } catch (error) {
-        toast.error("Failed to fetch bom");
-        console.error("Failed to fetch bom:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchComponents();
-  }, [items]);
+    if (items.length > 0) {
+      dispatch(fetchBOM(items));
+    }
+  }, [dispatch, items]);
 
   // Memoize filtered items to reduce recalculations
   const filteredItems = useMemo(() => {
-    if (!debouncedQuery) return components;
-    return components.filter((item) =>
-      item.internal_item_name.toLowerCase().includes(debouncedQuery)
+    console.log("bomsssss: ", boms);
+
+    if (!debouncedQuery) return boms;
+    return boms.filter((item) =>
+      item.component_name.toLowerCase().includes(debouncedQuery)
     );
-  }, [debouncedQuery, components]);
+  }, [debouncedQuery, boms]);
 
   // Handle search input changes
   const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
-  // Handle adding a new component
-  const handleAddComponent = async () => {
-    if (
-      !newComponent.component_id ||
-      !newComponent.item_id ||
-      !newComponent.quantity
-    ) {
-      toast.error("Input values are missing");
-      return;
-    }
-
-    // Check if the component already exists
-    const exists = components.some(
-      (component) =>
-        component.component_id === Number(newComponent.component_id) &&
-        component.item_id === Number(newComponent.item_id)
-    );
-
-    if (exists) {
-      toast.error("Component already exists");
-      return;
-    }
-
-    setIsLoading(true);
-    const payload = {
-      component_id: Number(newComponent.component_id),
-      quantity: Number(newComponent.quantity),
-      item_id: Number(newComponent.item_id),
-      created_by: "user3",
-      last_updated_by: "user3",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  const validateBOM = (data, currentPendingState) => {
+    const errors = {
+      missingSellItem: true, // For sell items
+      missingPurchaseItem: true, // For purchase items
+      missingComponentItem: true, // For component items
     };
 
-    try {
-      const matchingItem = items.find(
-        (item) => item.id === payload.item_id
-      ) || {
-        internal_item_name: "Unknown",
-      };
+    const removePendingJobs = [];
+    const PendingJobs = [];
 
-      const response = await fetch("https://api-assignment.inveesync.in/bom", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    // Loop through the updated boms data
+    data.map((component) => {
+      const { item_id, component_id } = component;
 
-      if (!response.ok) {
-        throw new Error("Failed to save the process");
+      const SellType = items.find((item) => item.id === item_id);
+      const purchaseType = items.find((item) => item.id === component_id);
+
+      // Validation 1: Sell items must have at least one `item_id`
+      if (SellType) {
+        errors.missingSellItem = false;
       }
 
-      const savedData = await response.json();
-      savedData.internal_item_name = matchingItem.internal_item_name;
-      setComponents((prevComponents) => [...prevComponents, savedData]);
-      setNewComponent({ component_id: "", quantity: "", item_id: "" });
-      toast.success("Component added successfully!");
-    } catch (error) {
-      toast.error("Failed to create component");
-      console.error("Failed to create component:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      if (purchaseType) {
+        errors.missingPurchaseItem = false;
+      }
+      errors.missingComponentItem = false;
 
-  const handleUpdateComponent = async (updatedData) => {
-    const exists = components.some(
-      (component) =>
-        component.component_id === updatedData.component_id &&
-        component.item_id === updatedData.item_id &&
-        component.id !== updatedData.id
+      return component;
+    });
+
+    // Push validation messages based on errors
+    if (!errors.missingSellItem) {
+      removePendingJobs.push({
+        reason: "Sell item must have at least one item_id.",
+      });
+    } else {
+      PendingJobs.push({
+        reason: "Sell item must have at least one item_id.",
+      });
+    }
+
+    if (!errors.missingPurchaseItem) {
+      removePendingJobs.push({
+        reason: "Purchase item must have at least one component_id.",
+      });
+    } else {
+      PendingJobs.push({
+        reason: "Purchase item must have at least one component_id.",
+      });
+    }
+
+    if (!errors.missingComponentItem) {
+      removePendingJobs.push({
+        reason:
+          "Component item must have at least one item_id and one component_id.",
+      });
+    } else {
+      PendingJobs.push({
+        reason:
+          "Component item must have at least one item_id and one component_id.",
+      });
+    }
+
+    // Directly update the currentPendingState
+    // Remove jobs from the current state
+    const updatedState = currentPendingState.filter(
+      (item) =>
+        !removePendingJobs.some((removeJob) => removeJob.reason === item.reason)
     );
 
-    if (exists) {
-      toast.error("A component with the same ID already exists");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Fetch the updated item name based on the updated item_id
-      const matchingItem = items.find(
-        (item) => item.id === updatedData.item_id
+    // Add new pending jobs to the current state
+    PendingJobs.forEach((newJob) => {
+      const existingJob = updatedState.find(
+        (item) => item.reason === newJob.reason
       );
-      if (matchingItem) {
-        updatedData.internal_item_name = matchingItem.internal_item_name;
+      if (!existingJob) {
+        updatedState.push(newJob);
       }
+    });
 
-      const response = await fetch(
-        `https://api-assignment.inveesync.in/bom/${updatedData.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedData),
-        }
-      );
-
-      if (!response.ok) {
-        toast.error("Failed to update item");
-        throw new Error("Failed to update item");
-      }
-
-      // Update local state
-      setComponents((prevItems) =>
-        prevItems.map((item) =>
-          item.id === updatedData.id ? { ...item, ...updatedData } : item
-        )
-      );
-
-      setComponentModal(false);
-      setSelectedComponent(null);
-      toast.success("Bom updated successfully!");
-    } catch (error) {
-      console.error("Failed to update bom:", error);
-      toast.error("Failed to update bom");
-    } finally {
-      setIsLoading(false);
-    }
+    return updatedState; // Return the updated state
   };
 
-  // Handle resolving a component
-  const handleResolveClick = (component) => {
-    setSelectedComponent(component);
-    setComponentModal(true);
-  };
-
-  // Handle deleting a component
   const handleDeleteComponent = async (id) => {
-    setIsLoading(true);
+    dispatch(startLoading());
     try {
-      setComponents((prevItems) => prevItems.filter((item) => item.id !== id));
+      // First, dispatch deleteBom action to remove the component
+      dispatch(deleteBom(id));
 
       const response = await fetch(
         `https://api-assignment.inveesync.in/bom/${id}`,
@@ -205,12 +136,24 @@ const NewBom = ({ items }) => {
         throw new Error("Failed to delete the item.");
       }
 
+      const updatedBoms = await fetch("https://api-assignment.inveesync.in/bom");
+      const bomData = await updatedBoms.json();
+
+      // Get the current state of pending items from Redux store
+      const currentPendingState = store.getState().pendingItems; // Direct access to Redux store
+
+      // Validate the BOM and get the updated pending jobs
+      const updatedPendingState = validateBOM(bomData, currentPendingState);
+
+      // Dispatch the new state to update the Redux store
+      dispatch(setPendingItems(updatedPendingState));
+
       toast.success("Item deleted successfully");
     } catch (error) {
       console.error("Error deleting item:", error);
       toast.error("Failed to delete item");
     } finally {
-      setIsLoading(false);
+      dispatch(stopLoading());
     }
   };
 
@@ -222,205 +165,63 @@ const NewBom = ({ items }) => {
         <h2>Bill of Materials Builder</h2>
         <p>Define product composition and component relationships</p>
 
-        <form className={styles.bomForm}>
-          {/* Add Component Form */}
-          <div className={styles.searchInputQuery}>
-            <h3>Add Bom</h3>
-            <input
-              type="text"
-              placeholder="Search by Item Name..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className={styles.searchInput}
-            />
-          </div>
-          <div className={styles.addComponentForm}>
-            <select
-              value={newComponent.component_id}
-              onChange={(e) =>
-                setNewComponent({
-                  ...newComponent,
-                  component_id: e.target.value,
-                })
-              }
-              required
-            >
-              <option value="">Select Component ID</option>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.internal_item_name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              placeholder="Quantity"
-              required
-              value={newComponent.quantity}
-              onChange={(e) =>
-                setNewComponent({ ...newComponent, quantity: e.target.value })
-              }
-            />
-            <select
-              value={newComponent.item_id}
-              required
-              onChange={(e) =>
-                setNewComponent({ ...newComponent, item_id: e.target.value })
-              }
-            >
-              <option value="">Select Item ID</option>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.internal_item_name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className={styles.addButton}
-              onClick={handleAddComponent}
-            >
-              Add
-            </button>
-          </div>
-
-          {/* Components Table */}
-          <div className={styles.tableContainer}>
-            <table className={styles.componentsTable}>
-              <thead>
-                <tr>
-                  <th>Component ID</th>
-                  <th>Item ID</th>
-                  <th>Quantity</th>
-                  <th>Actions</th>
+        <div className={styles.searchContainer}>
+          <button
+            className={styles.addItemButton}
+            onClick={() => handleResolveBomClick({})}
+          >
+            Add Component
+          </button>
+          <input
+            type="text"
+            placeholder="Search by Item Name..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className={styles.searchInput}
+          />
+        </div>
+        {/* Components Table */}
+        <div className={styles.tableContainer}>
+          <table className={styles.componentsTable}>
+            <thead>
+              <tr>
+                <th>Component ID</th>
+                <th>Item ID</th>
+                <th>Quantity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((component) => (
+                <tr key={component.id}>
+                  <td>{component.component_name}</td>
+                  <td>{component.internal_item_name}</td>
+                  <td>{component.quantity}</td>
+                  <td
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                    }}
+                  >
+                    <FaEdit
+                      className={styles.editIcon}
+                      onClick={() => handleResolveBomClick(component)}
+                      title="Edit Component"
+                    />
+                    <FaTrashAlt
+                      className={styles.deleteIcon}
+                      onClick={() => handleDeleteComponent(component.id)}
+                      title="Delete Component"
+                    />
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((component) => (
-                  <tr key={component.id}>
-                    <td>{component.component_id}</td>
-                    <td>{component.internal_item_name}</td>
-                    <td>{component.quantity}</td>
-                    <td
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                      }}
-                    >
-                      <FaEdit
-                        className={styles.editIcon}
-                        onClick={() => handleResolveClick(component)}
-                        title="Edit Component"
-                      />
-                      <FaTrashAlt
-                        className={styles.deleteIcon}
-                        onClick={() => handleDeleteComponent(component.id)}
-                        title="Delete Component"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredItems.length === 0 && (
-              <div className={styles.noData}>
-                No matching components found.
-              </div>
-            )}
-          </div>
-        </form>
-        {componentModal && selectedComponent && (
-          <div className={styles.modal}>
-            <div className={styles.modalContent}>
-              <h2>Edit Component</h2>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  const updatedData = {
-                    ...selectedComponent,
-                    component_id: Number(formData.get("component_id")),
-                    item_id: Number(formData.get("item_id")),
-                    quantity: Number(formData.get("quantity")),
-                  };
-                  handleUpdateComponent(updatedData);
-                }}
-              >
-                <label>
-                  Component Id:
-                  <select
-                    value={selectedComponent.component_id}
-                    name="component_id"
-                    required
-                    onChange={(e) =>
-                      setSelectedComponent((prevItem) => ({
-                        ...prevItem,
-                        component_id: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Select Component ID</option>
-                    {items.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.internal_item_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Item Id:
-                  <select
-                    value={selectedComponent.item_id}
-                    name="item_id"
-                    required
-                    onChange={(e) =>
-                      setSelectedComponent((prevItem) => ({
-                        ...prevItem,
-                        item_id: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Select Component ID</option>
-                    {items.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.internal_item_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Quantity:
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={selectedComponent.quantity}
-                    required
-                    onChange={(e) =>
-                      setSelectedComponent((prevItem) => ({
-                        ...prevItem,
-                        quantity: e.target.value,
-                      }))
-                    }
-                  />
-                </label>
-
-                {/* Button Container */}
-                <div className={styles.buttonContainer}>
-                  <button type="submit" className={styles.submitButton}>
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setComponentModal(false)}
-                    className={styles.cancelButton}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              ))}
+            </tbody>
+          </table>
+          {filteredItems.length === 0 && (
+            <div className={styles.noData}>No matching boms found.</div>
+          )}
+        </div>
       </div>
     </>
   );
