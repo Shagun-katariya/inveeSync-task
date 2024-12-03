@@ -32,6 +32,7 @@
   - `lodash.debounce`: For optimized search input handling
   - `useMemo` and `useCallback`: To optimize rendering and filtering logic
     and many more
+  - `dotenv`: for best practise
 
 ---
 
@@ -64,8 +65,7 @@ http://localhost:3000
 
 ## Assumption
 ### Google Drive(https://drive.google.com/file/d/1-NZ6MCxVhSNB-H5uIKXFkVxIs6gnn8bQ/view?usp=sharing)
-Use this Bom upload sheet for faster data test(because I replaced with the correct Item_id and component_id)
-for Items we can use default one
+Update the bom and items excel sheet for correct data upload with correct item_id and component_id
 Highly recommend, use only UI for updations
         
 ### Download Template
